@@ -60,7 +60,7 @@ public:
     Private(ColorWheel *widget)
         : w(widget), hue(0), sat(0), val(0),
         wheel_width(20), mouse_status(Nothing),
-        color_from(&QColor::fromHsvF), rainbow_from_hue(&utils::rainbow_hsv)
+        color_from(&utils::color_fromHsvF), rainbow_from_hue(&utils::rainbow_hsv)
     {
     }
 

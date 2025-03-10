@@ -8,11 +8,11 @@
 #include "src/utils/filenamehandler.h"
 #include "src/utils/systemnotification.h"
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QGuiApplication>
 #include <QPixmap>
 #include <QProcess>
 #include <QScreen>
+#include <QWindow>
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
 #include "request.h"
@@ -80,16 +80,8 @@ void ScreenGrabber::freeDesktopPortal(bool& ok, QPixmap& res)
             QUrl uri = map.value("uri").toString();
             QString uriString = uri.toLocalFile();
             res = QPixmap(uriString);
-            QScreen* screen = QGuiAppCurrentScreen().currentScreen();
-            if (screen)
-            {
-                const auto screenRect = screen->geometry();
-                res.setDevicePixelRatio(res.height() * 1.0f / screenRect.height());
-            }
-            else
-            {
-                res.setDevicePixelRatio(qApp->devicePixelRatio());
-            }
+            QScreen *primaryScreen = QGuiApplication::primaryScreen();
+            res.setDevicePixelRatio(primaryScreen->devicePixelRatio());
             QFile imgFile(uriString);
             imgFile.remove();
         }
@@ -119,10 +111,20 @@ void ScreenGrabber::freeDesktopPortal(bool& ok, QPixmap& res)
 QPixmap ScreenGrabber::grabEntireDesktop(bool& ok)
 {
     ok = true;
+    QScreen *primaryScreen = QGuiApplication::primaryScreen();
+    if (!primaryScreen) {
+        qWarning("No primary screen found!");
+        return QPixmap(0, 0);
+    }
+
+    QWindow window;
+    window.setScreen(primaryScreen);
+    window.show();
+    WId wid = window.winId();
 #if defined(Q_OS_MACOS)
     QScreen* currentScreen = QGuiAppCurrentScreen().currentScreen();
     QPixmap screenPixmap(
-      currentScreen->grabWindow(QApplication::desktop()->winId(),
+      currentScreen->grabWindow(wid,
                                 currentScreen->geometry().x(),
                                 currentScreen->geometry().y(),
                                 currentScreen->geometry().width(),
@@ -180,14 +182,12 @@ QPixmap ScreenGrabber::grabEntireDesktop(bool& ok)
 #if defined(Q_OS_LINUX) || defined(Q_OS_UNIX) || defined(Q_OS_WIN)
     QRect geometry = desktopGeometry();
     QPixmap p(QApplication::primaryScreen()->grabWindow(
-      QApplication::desktop()->winId(),
+      wid,
       geometry.x(),
       geometry.y(),
       geometry.width(),
       geometry.height()));
-    auto screenNumber = QApplication::desktop()->screenNumber();
-    QScreen* screen = QApplication::screens()[screenNumber];
-    p.setDevicePixelRatio(screen->devicePixelRatio());
+    p.setDevicePixelRatio(primaryScreen->devicePixelRatio());
     return p;
 #endif
 }
@@ -227,7 +227,17 @@ QPixmap ScreenGrabber::grabScreen(QScreen* screen, bool& ok)
         }
     } else {
         ok = true;
-        return screen->grabWindow(QApplication::desktop()->winId(),
+        QScreen *primaryScreen = QGuiApplication::primaryScreen();
+        if (!primaryScreen) {
+            qWarning("No primary screen found!");
+            return p;
+        }
+
+        QWindow window;
+        window.setScreen(primaryScreen);
+        window.show();
+        WId wid = window.winId();
+        return screen->grabWindow(wid,
                                   geometry.x(),
                                   geometry.y(),
                                   geometry.width(),

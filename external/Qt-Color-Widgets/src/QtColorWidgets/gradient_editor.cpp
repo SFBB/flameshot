@@ -504,7 +504,7 @@ QSize GradientEditor::sizeHint() const
     }
     QSlider s;
     return style()->sizeFromContents(QStyle::CT_Slider, &opt, QSize(w, h), &s)
-        .expandedTo(QApplication::globalStrut());
+        .expandedTo(QSize(w, h));
 }
 
 int GradientEditor::selectedStop() const

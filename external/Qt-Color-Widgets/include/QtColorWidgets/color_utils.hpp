@@ -32,6 +32,15 @@ namespace color_widgets {
 namespace utils {
 
 
+QCP_EXPORT inline QColor color_fromHsvF(qreal h, qreal s, qreal v, qreal a = 1.0)
+{
+    float fh = h;
+    float fs = s;
+    float fv = v;
+    float fa = a;
+    return QColor::fromHsvF(fh, fs, fv, fa);
+}
+
 QCP_EXPORT inline qreal color_chromaF(const QColor& c)
 {
     qreal max = qMax(c.redF(), qMax(c.greenF(), c.blueF()));

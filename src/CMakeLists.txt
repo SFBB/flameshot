@@ -1,5 +1,5 @@
 find_package(
-        Qt5
+        Qt6
         CONFIG
         REQUIRED
         Core
@@ -9,6 +9,8 @@ find_package(
         Svg
         DBus
         LinguistTools)
+
+find_package(Qt6 REQUIRED COMPONENTS Core5Compat)
 
 if (USE_WAYLAND_CLIPBOARD)
     find_package(KF5GuiAddons)
@@ -136,9 +138,9 @@ set(FLAMESHOT_TS_FILES
          )
 
 if (GENERATE_TS)
-    qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${FLAMESHOT_TS_FILES})
+    qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${FLAMESHOT_TS_FILES})
 else ()
-    qt5_add_translation(QM_FILES ${FLAMESHOT_TS_FILES})
+    qt_add_translation(QM_FILES ${FLAMESHOT_TS_FILES})
 endif ()
 
 target_sources(
@@ -210,13 +212,13 @@ target_link_libraries(
         flameshot
         project_warnings
         project_options
-        Qt5::Svg
-        Qt5::DBus
-        Qt5::Network
-        Qt5::Widgets
+        Qt6::Svg
+        Qt6::DBus
+        Qt6::Network
+        Qt6::Widgets
+        Qt6::Core5Compat
         ${QTSINGLEAPPLICATION_LIBRARY}
         QtColorWidgets
-
 )
 
 if (USE_WAYLAND_CLIPBOARD)
@@ -431,7 +433,7 @@ endif ()
 # macdeployqt
 if (APPLE)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-    execute_process(COMMAND brew --prefix qt5 OUTPUT_VARIABLE QTDIR)
+    execute_process(COMMAND brew --prefix qt6 OUTPUT_VARIABLE QTDIR)
     string(REGEX REPLACE "\n$" "" QTDIR "${QTDIR}")
     set(MAC_DEPLOY_QT ${QTDIR}/bin/macdeployqt)
     if (EXISTS ${MAC_DEPLOY_QT})

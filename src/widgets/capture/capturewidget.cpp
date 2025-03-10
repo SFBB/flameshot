@@ -32,7 +32,6 @@
 #include <QApplication>
 #include <QDateTime>
 #include <QDebug>
-#include <QDesktopWidget>
 #include <QFontMetrics>
 #include <QLabel>
 #include <QPaintEvent>
@@ -1239,7 +1238,7 @@ void CaptureWidget::initSelection()
     if (!initialSelection.isNull()) {
         const qreal scale = m_context.screenshot.devicePixelRatio();
         initialSelection.moveTopLeft(initialSelection.topLeft() -
-                                     mapToGlobal({}));
+                                     mapToGlobal(QPoint(0, 0)));
         initialSelection.setTop(initialSelection.top() / scale);
         initialSelection.setBottom(initialSelection.bottom() / scale);
         initialSelection.setLeft(initialSelection.left() / scale);
@@ -1768,6 +1767,9 @@ QPoint CaptureWidget::snapToGrid(const QPoint& point) const
 
 QPointer<CaptureTool> CaptureWidget::activeToolObject()
 {
+    if (!m_panel) {
+        return nullptr;
+    }
     return m_captureToolObjects.at(m_panel->activeLayerIndex());
 }
 

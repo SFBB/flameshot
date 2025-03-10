@@ -20,6 +20,7 @@
 #include <QProcess>
 #include <QStandardPaths>
 #include <QTabWidget>
+#include <QRegularExpression>
 
 namespace {
 #if defined(Q_OS_WIN)
@@ -131,7 +132,7 @@ void AppLauncherWidget::launch(const QModelIndex& index)
         // but that means we need to substitute IN the array not the string!
         for (auto& i : prog_args) {
             if (i.contains("%"))
-                i.replace(QRegExp("(\\%.)"), m_tempFile);
+                i.replace(QRegularExpression("(\\%.)"), m_tempFile);
         }
     } else {
         // we really should append the file name if there
@@ -173,7 +174,9 @@ void AppLauncherWidget::searchChanged(const QString& text)
         m_tabWidget->hide();
         m_filterList->show();
         m_filterList->clear();
-        QRegExp regexp(text, Qt::CaseInsensitive, QRegExp::Wildcard);
+        QString pattern = QRegularExpression::wildcardToRegularExpression(text);
+        QRegularExpression regexp(pattern);
+        regexp.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
         QVector<DesktopAppData> apps;
 
         for (auto const& i : catIconNames.toStdMap()) {

@@ -136,7 +136,7 @@ bool PinWidget::scrollEvent(QWheelEvent* event)
     return true;
 }
 
-void PinWidget::enterEvent(QEvent*)
+void PinWidget::enterEvent(QEnterEvent*)
 {
     m_shadowEffect->setColor(m_hoverColor);
 }

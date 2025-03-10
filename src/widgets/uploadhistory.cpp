@@ -6,9 +6,9 @@
 #include "uploadlineitem.h"
 
 #include <QDateTime>
-#include <QDesktopWidget>
 #include <QFileInfo>
 #include <QPixmap>
+#include <QScreen>
 
 void scaleThumbnail(QPixmap& pixmap)
 {
@@ -37,7 +37,12 @@ UploadHistory::UploadHistory(QWidget* parent)
     setAttribute(Qt::WA_DeleteOnClose);
 
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    resize(QDesktopWidget().availableGeometry(this).size() * 0.5);
+    QRect screenSize = QRect(0, 0, 1080, 960);
+    if (QGuiApplication::primaryScreen())
+    {
+        screenSize = QGuiApplication::primaryScreen()->availableGeometry();
+    }
+    resize(screenSize.size() * 0.5);
 }
 
 void UploadHistory::loadHistory()

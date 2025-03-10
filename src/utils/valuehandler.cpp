@@ -235,7 +235,7 @@ QVariant KeySequence::process(const QVariant& val)
     }
     if (str.length() > 0) {
         // Make the "main" key in sequence (last one) lower-case.
-        const QCharRef& lastChar = str[str.length() - 1];
+        const QChar& lastChar = str[str.length() - 1];
         str.replace(str.length() - 1, 1, lastChar.toLower());
     }
     return str;
@@ -534,14 +534,14 @@ QVariant Region::process(const QVariant& val)
         return ScreenGrabber().desktopGeometry();
     } else if (str.startsWith("screen")) {
         bool ok;
-        int number = str.midRef(6).toInt(&ok);
+        int number = str.mid(6).toInt(&ok);
         if (!ok || number < 0) {
             return {};
         }
         return ScreenGrabber().screenGeometry(qApp->screens()[number]);
     }
 
-    QRegExp regex("(-{,1}\\d+)"   // number (any sign)
+    QRegularExpression regex("(-{,1}\\d+)"   // number (any sign)
                   "[x,\\.\\s]"    // separator ('x', ',', '.', or whitespace)
                   "(-{,1}\\d+)"   // number (any sign)
                   "[\\+,\\.\\s]*" // separator ('+',',', '.', or whitespace)
@@ -550,16 +550,17 @@ QVariant Region::process(const QVariant& val)
                   "(-{,1}\\d+)"   // number (non-negative)
     );
 
-    if (!regex.exactMatch(str)) {
+    QRegularExpressionMatch match = regex.match(str);
+    if (!match.hasMatch()) {
         return {};
     }
 
     int w, h, x, y;
     bool w_ok, h_ok, x_ok, y_ok;
-    w = regex.cap(1).toInt(&w_ok);
-    h = regex.cap(2).toInt(&h_ok);
-    x = regex.cap(3).toInt(&x_ok);
-    y = regex.cap(4).toInt(&y_ok);
+    w = match.captured(1).toInt(&w_ok);
+    h = match.captured(2).toInt(&h_ok);
+    x = match.captured(3).toInt(&x_ok);
+    y = match.captured(4).toInt(&y_ok);
 
     if (!(w_ok && h_ok && x_ok && y_ok)) {
         return {};

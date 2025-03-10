@@ -25,7 +25,6 @@
 #include <QBuffer>
 #include <QDebug>
 #include <QDesktopServices>
-#include <QDesktopWidget>
 #include <QFile>
 #include <QMessageBox>
 #include <QThread>
@@ -53,7 +52,13 @@ Flameshot::Flameshot()
     // permissions on the first run. Otherwise it will be hidden under the
     // CaptureWidget
     QScreen* currentScreen = QGuiAppCurrentScreen().currentScreen();
-    currentScreen->grabWindow(QApplication::desktop()->winId(), 0, 0, 1, 1);
+    QScreen *primaryScreen = QGuiApplication::primaryScreen();
+
+    QWindow window;
+    window.setScreen(screen);
+    window.show();
+    WId wid = window.winId();
+    currentScreen->grabWindow(wid, 0, 0, 1, 1);
 
     // set global shortcuts for MacOS
     m_HotkeyScreenshotCapture = new QHotkey(

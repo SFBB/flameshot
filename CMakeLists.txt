@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16)
 # cmake_policy(SET CMP0076 OLD)
 
 set(FLAMESHOT_VERSION 12.1.0)
@@ -41,7 +41,6 @@ if (APPLE)
   set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
 endif()
 
-
 # Configuration options
 set(DEFAULT_RUN_IN_PLACE FALSE)
 if(WIN32)
@@ -53,14 +52,13 @@ if(WIN32)
   add_definitions(-DFLAMESHOT_VERSION_BUILD=1)
   add_definitions(-DFLAMESHOT_VERSION_STRING="${PROJECT_VERSION}")
 elseif(APPLE)
-  set(Qt5_DIR "$(brew --prefix qt5)/lib/cmake/Qt5/" CACHE PATH "directory where Qt5Config.cmake exists.")
+  set(Qt6_DIR "$(brew --prefix qt)/lib/cmake/Qt6/" CACHE PATH "directory where Qt6Config.cmake exists.")
   set(CMAKE_MACOSX_BUNDLE ON)
   set(CMAKE_MACOSX_RPATH ON)
 endif()
 set(RUN_IN_PLACE
         ${DEFAULT_RUN_IN_PLACE}
         CACHE BOOL "Run directly in source directory structure")
-
 
 option(FLAMESHOT_DEBUG_CAPTURE "Enable mode to make debugging easier" OFF)
 option(USE_MONOCHROME_ICON "Build using monochrome icon as default" OFF)
@@ -99,8 +97,8 @@ set(QAPPLICATION_CLASS
 
 if(USE_EXTERNAL_SINGLEAPPLICATION)
   # look for external QtSingleApplication
-  # package dev-qt/qtsingleapplication provides no symlink to current version
-  set(qtsingleapplication_libs libQt5Solutions_SingleApplication-2.6 Qt5Solutions_SingleApplication-2.6)
+  # Note: This assumes a Qt6-compatible version exists; adjust library names if needed
+  set(qtsingleapplication_libs libQt6Solutions_SingleApplication Qt6Solutions_SingleApplication-2.6)
   find_library(QTSINGLEAPPLICATION_LIBRARY NAMES ${qtsingleapplication_libs})
   message(STATUS "Using external SingleApplication library")
 else()
@@ -108,11 +106,9 @@ else()
   set(QTSINGLEAPPLICATION_LIBRARY SingleApplication::SingleApplication)
 endif()
 
-
 option(BUILD_STATIC_LIBS ON)
 option(BUILD_SHARED_LIBS OFF)
-add_subdirectory(external/Qt-Color-Widgets EXCLUDE_FROM_ALL) 
-
+add_subdirectory(external/Qt-Color-Widgets EXCLUDE_FROM_ALL)
 
 if (APPLE)
   add_subdirectory(external/QHotkey)
