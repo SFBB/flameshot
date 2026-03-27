@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SPDX-FileCopyrightText: 2017-2019 Alejandro Sirgo Rica & Contributors
+
 #include "generalconf.h"
-#include "src/core/flameshot.h"
-#include "src/utils/confighandler.h"
+#include "utils/confighandler.h"
+
 #include <QCheckBox>
 #include <QComboBox>
 #include <QFile>
@@ -55,6 +56,9 @@ GeneralConf::GeneralConf(QWidget* parent)
     initAntialiasingPinZoom();
     initUndoLimit();
     initInsecurePixelate();
+#if defined(Q_OS_LINUX)
+    initUseX11LegacyScreenshot();
+#endif
 #ifdef ENABLE_IMGUR
     initCopyAndCloseAfterUpload();
     initUploadWithoutConfirmation();
@@ -122,6 +126,9 @@ void GeneralConf::_updateComponents(bool allowEmptySavePath)
     }
 #if defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
     m_showTray->setChecked(!config.disabledTrayIcon());
+#endif
+#if defined(Q_OS_LINUX)
+    m_useX11LegacyScreenshot->setChecked(config.useX11LegacyScreenshot());
 #endif
 }
 
@@ -908,3 +915,27 @@ void GeneralConf::setInsecurePixelate(bool checked)
 {
     ConfigHandler().setInsecurePixelate(checked);
 }
+
+#if defined(Q_OS_LINUX)
+void GeneralConf::initUseX11LegacyScreenshot()
+{
+    m_useX11LegacyScreenshot =
+      new QCheckBox(tr("Use legacy X11 screenshot method (deprecated)"), this);
+    m_useX11LegacyScreenshot->setToolTip(
+      tr("Bypass the freedesktop portal and use Qt's native X11 screen "
+         "capture. Enable this if your window manager lacks "
+         "xdg-desktop-portal (e.g. xmonad, i3). "
+         "Only effective on X11; ignored on Wayland."));
+    m_scrollAreaLayout->addWidget(m_useX11LegacyScreenshot);
+
+    connect(m_useX11LegacyScreenshot,
+            &QCheckBox::clicked,
+            this,
+            &GeneralConf::useX11LegacyScreenshotChanged);
+}
+
+void GeneralConf::useX11LegacyScreenshotChanged(bool checked)
+{
+    ConfigHandler().setUseX11LegacyScreenshot(checked);
+}
+#endif
